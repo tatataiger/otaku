@@ -597,6 +597,7 @@ class TournamentManager {
             }
         });
         
+        tournament.preliminaryFinalized = true;
         tournament.phase = 'final';
         this.saveData();
         return true;
@@ -1075,13 +1076,14 @@ function updateFinalMatchList() {
     
     if (!container) return;
     
-    if (!currentTournament.preliminaryFinalized) {
+    // preliminaryFinalized または phase === 'final' でチェック
+    if (!currentTournament.preliminaryFinalized && currentTournament.phase !== 'final') {
         container.innerHTML = '<p class="empty-state">予選リーグ終了後に決勝戦が表示されます</p>';
         return;
     }
     
     const finalMatches = currentTournament.finalMatches;
-    if (finalMatches.length === 0) {
+    if (!finalMatches || finalMatches.length === 0) {
         container.innerHTML = '<p class="empty-state">決勝戦データがありません</p>';
         return;
     }
