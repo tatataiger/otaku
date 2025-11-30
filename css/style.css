@@ -379,6 +379,16 @@ h3 {
     font-weight: 600;
 }
 
+/* 勝ち点列を強調 */
+.standings-table th:nth-child(3) {
+    background-color: var(--accent-color);
+}
+
+.standings-table td:nth-child(3) {
+    color: var(--accent-color);
+    font-size: 1.1rem;
+}
+
 .standings-table tbody tr:hover {
     background-color: rgba(44, 95, 45, 0.1);
 }

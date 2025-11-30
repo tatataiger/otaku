@@ -221,6 +221,7 @@ class TournamentManager {
                 wins: 0,
                 losses: 0,
                 draws: 0,
+                points: 0,  // 勝ち点
                 runsFor: 0,
                 runsAgainst: 0,
                 winRate: 0
@@ -242,18 +243,24 @@ class TournamentManager {
 
                 if (match.homeScore > match.awayScore) {
                     home.wins++;
+                    home.points += 3;  // 勝利: 3点
                     away.losses++;
+                    // 敗北: 0点
                 } else if (match.homeScore < match.awayScore) {
                     home.losses++;
+                    // 敗北: 0点
                     away.wins++;
+                    away.points += 3;  // 勝利: 3点
                 } else {
                     home.draws++;
+                    home.points += 1;  // 引分: 1点
                     away.draws++;
+                    away.points += 1;  // 引分: 1点
                 }
             }
         });
 
-        // 勝率を計算してソート
+        // 勝ち点でソート（同点なら得失点差、さらに同点なら得点）
         return Object.values(stats)
             .map(s => {
                 const totalGames = s.wins + s.losses;
@@ -262,9 +269,11 @@ class TournamentManager {
                 return s;
             })
             .sort((a, b) => {
-                // 勝率でソート、同率なら得失点差でソート
-                if (b.winRate !== a.winRate) return b.winRate - a.winRate;
+                // 勝ち点でソート
+                if (b.points !== a.points) return b.points - a.points;
+                // 同点なら得失点差でソート
                 if (b.runDiff !== a.runDiff) return b.runDiff - a.runDiff;
+                // さらに同点なら得点でソート
                 return b.runsFor - a.runsFor;
             });
     }
@@ -585,13 +594,13 @@ function updateStandings() {
     const stats = tournament.getTeamStats();
     
     if (!tournament.getCurrentTournament()) {
-        tbody.innerHTML = '<tr><td colspan="10" class="empty-state">大会を選択してください</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="11" class="empty-state">大会を選択してください</td></tr>';
         document.getElementById('matchupTable').innerHTML = '';
         return;
     }
     
     if (stats.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10" class="empty-state">チームが登録されていません</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="11" class="empty-state">チームが登録されていません</td></tr>';
         document.getElementById('matchupTable').innerHTML = '';
         return;
     }
@@ -600,6 +609,7 @@ function updateStandings() {
         <tr>
             <td>${index + 1}</td>
             <td>${team.name}</td>
+            <td><strong>${team.points}</strong></td>
             <td>${team.played}</td>
             <td>${team.wins}</td>
             <td>${team.losses}</td>
