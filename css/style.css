@@ -1,7 +1,10 @@
 /* ===================================
    草野球大会 スコア管理システム
-   スタイルシート
+   モダンスタイルシート v2.0
    =================================== */
+
+/* Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap');
 
 /* リセットと基本スタイル */
 * {
@@ -11,39 +14,88 @@
 }
 
 :root {
-    --primary-color: #2c5f2d;
-    --primary-dark: #1e4620;
-    --secondary-color: #97bc62;
-    --accent-color: #f5a623;
-    --background-color: #f5f5f5;
+    /* メインカラーパレット */
+    --primary-color: #1a365d;
+    --primary-light: #2b4c7e;
+    --primary-dark: #0f2444;
+    --secondary-color: #48bb78;
+    --secondary-light: #68d391;
+    --accent-color: #ed8936;
+    --accent-light: #f6ad55;
+    
+    /* 背景色 */
+    --background-color: #f7fafc;
+    --background-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     --card-background: #ffffff;
-    --text-color: #333333;
-    --text-light: #666666;
-    --border-color: #e0e0e0;
-    --success-color: #28a745;
-    --danger-color: #dc3545;
-    --warning-color: #ffc107;
+    
+    /* テキスト */
+    --text-color: #2d3748;
+    --text-light: #718096;
+    --text-muted: #a0aec0;
+    
+    /* ボーダー・シャドウ */
+    --border-color: #e2e8f0;
+    --border-radius: 16px;
+    --border-radius-sm: 8px;
+    --box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    --box-shadow-sm: 0 4px 15px rgba(0, 0, 0, 0.08);
+    --box-shadow-hover: 0 20px 60px rgba(0, 0, 0, 0.15);
+    
+    /* ステータスカラー */
+    --success-color: #48bb78;
+    --danger-color: #f56565;
+    --warning-color: #ecc94b;
+    --info-color: #4299e1;
+    
+    /* 陣営カラー */
+    --camp-a-color: #e53e3e;
+    --camp-a-light: #fc8181;
+    --camp-a-bg: rgba(229, 62, 62, 0.1);
+    --camp-b-color: #3182ce;
+    --camp-b-light: #63b3ed;
+    --camp-b-bg: rgba(49, 130, 206, 0.1);
 }
 
 body {
-    font-family: 'Segoe UI', 'Hiragino Sans', 'Meiryo', sans-serif;
-    background-color: var(--background-color);
+    font-family: 'Noto Sans JP', 'Segoe UI', sans-serif;
+    background: var(--background-color);
     color: var(--text-color);
-    line-height: 1.6;
+    line-height: 1.8;
+    min-height: 100vh;
 }
 
-/* ヘッダー */
+/* ===================================
+   ヘッダー
+   =================================== */
 header {
-    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    background: var(--background-gradient);
     color: white;
-    padding: 1rem 2rem;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    padding: 1.5rem 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+}
+
+header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    pointer-events: none;
 }
 
 header h1 {
     font-size: 1.8rem;
-    margin-bottom: 0.5rem;
+    font-weight: 900;
+    margin-bottom: 0.75rem;
     text-align: center;
+    position: relative;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    letter-spacing: 0.05em;
 }
 
 /* 大会セレクター */
@@ -51,65 +103,113 @@ header h1 {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
     flex-wrap: wrap;
+    position: relative;
 }
 
 .tournament-selector select {
-    padding: 0.5rem 1rem;
+    padding: 0.75rem 1.5rem;
     border: none;
-    border-radius: 8px;
+    border-radius: 50px;
     font-size: 1rem;
-    min-width: 200px;
+    font-weight: 500;
+    min-width: 220px;
     cursor: pointer;
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--primary-color);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.tournament-selector select:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
 .tournament-selector select:focus {
-    outline: 2px solid var(--secondary-color);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.5);
 }
 
-.btn-small {
-    padding: 0.5rem 1rem;
-    font-size: 0.9rem;
-}
-
+/* ナビゲーション */
 nav ul {
     display: flex;
     justify-content: center;
     list-style: none;
     gap: 0.5rem;
     flex-wrap: wrap;
+    position: relative;
 }
 
 nav ul li a {
-    color: white;
+    color: rgba(255, 255, 255, 0.9);
     text-decoration: none;
-    padding: 0.5rem 1.5rem;
-    border-radius: 25px;
-    transition: all 0.3s ease;
+    padding: 0.6rem 1.5rem;
+    border-radius: 50px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     display: block;
+    font-weight: 500;
+    font-size: 0.95rem;
+    position: relative;
+    overflow: hidden;
 }
 
-nav ul li a:hover,
+nav ul li a::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50px;
+    transform: scale(0);
+    transition: transform 0.3s ease;
+}
+
+nav ul li a:hover::before {
+    transform: scale(1);
+}
+
+nav ul li a:hover {
+    color: white;
+    transform: translateY(-2px);
+}
+
 nav ul li a.active {
-    background-color: var(--secondary-color);
-    color: var(--primary-dark);
+    background: rgba(255, 255, 255, 0.25);
+    color: white;
+    backdrop-filter: blur(10px);
 }
 
-/* メインコンテンツ */
+/* ===================================
+   メインコンテンツ
+   =================================== */
 main {
-    padding: 2rem;
     max-width: 1200px;
     margin: 0 auto;
-    min-height: calc(100vh - 200px);
+    padding: 2rem;
 }
 
 .container {
     background: var(--card-background);
-    border-radius: 12px;
+    border-radius: var(--border-radius);
     padding: 2rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--box-shadow);
+    animation: fadeInUp 0.5s ease;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .page {
@@ -121,23 +221,143 @@ main {
 }
 
 h2 {
-    color: var(--primary-color);
+    font-size: 1.75rem;
+    font-weight: 700;
     margin-bottom: 1.5rem;
-    padding-bottom: 0.5rem;
+    padding-bottom: 1rem;
     border-bottom: 3px solid var(--secondary-color);
+    color: var(--primary-color);
+    position: relative;
+}
+
+h2::after {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background: var(--accent-color);
 }
 
 h3 {
-    color: var(--primary-dark);
-    margin: 1rem 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--primary-light);
 }
 
 .section-title {
-    margin-top: 2rem;
-    padding-top: 1rem;
+    margin-top: 2.5rem;
 }
 
-/* 大会情報カード */
+/* ===================================
+   ボタン
+   =================================== */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1.75rem;
+    border: none;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    color: white;
+    box-shadow: 0 4px 15px rgba(26, 54, 93, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(26, 54, 93, 0.4);
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, #718096, #a0aec0);
+    color: white;
+    box-shadow: 0 4px 15px rgba(113, 128, 150, 0.3);
+}
+
+.btn-secondary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(113, 128, 150, 0.4);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, var(--success-color), var(--secondary-light));
+    color: white;
+    box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+}
+
+.btn-success:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(72, 187, 120, 0.4);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, var(--danger-color), #fc8181);
+    color: white;
+    box-shadow: 0 4px 15px rgba(245, 101, 101, 0.3);
+}
+
+.btn-danger:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(245, 101, 101, 0.4);
+}
+
+.btn-score {
+    background: linear-gradient(135deg, var(--accent-color), var(--accent-light));
+    color: white;
+    box-shadow: 0 4px 15px rgba(237, 137, 54, 0.3);
+}
+
+.btn-score:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(237, 137, 54, 0.4);
+}
+
+.btn-small {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* ===================================
+   大会情報カード
+   =================================== */
 .tournament-info {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -146,102 +366,52 @@ h3 {
 }
 
 .info-card {
-    background: linear-gradient(135deg, var(--secondary-color), #7da552);
+    background: linear-gradient(145deg, #f8fafc, #edf2f7);
     padding: 1.5rem;
-    border-radius: 10px;
+    border-radius: var(--border-radius);
     text-align: center;
-    color: white;
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-color);
+}
+
+.info-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--box-shadow-sm);
 }
 
 .info-card h3 {
-    color: white;
-    font-size: 0.9rem;
-    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-light);
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.info-card input,
+.info-card span {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--primary-color);
 }
 
 .info-card input {
     width: 100%;
     padding: 0.5rem;
-    border: none;
-    border-radius: 5px;
+    border: 2px solid transparent;
+    border-radius: var(--border-radius-sm);
     text-align: center;
-    font-size: 1rem;
+    background: white;
+    transition: border-color 0.3s;
 }
 
-.info-card span {
-    font-size: 2rem;
-    font-weight: bold;
+.info-card input:focus {
+    outline: none;
+    border-color: var(--secondary-color);
 }
 
-/* ボタン */
-.btn {
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 1rem;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    display: inline-block;
-}
-
-.btn-primary {
-    background-color: var(--primary-color);
-    color: white;
-}
-
-.btn-primary:hover {
-    background-color: var(--primary-dark);
-    transform: translateY(-2px);
-}
-
-.btn-secondary {
-    background-color: var(--text-light);
-    color: white;
-}
-
-.btn-secondary:hover {
-    background-color: var(--text-color);
-}
-
-.btn-success {
-    background-color: var(--success-color);
-    color: white;
-}
-
-.btn-success:hover {
-    background-color: #218838;
-}
-
-.btn-danger {
-    background-color: var(--danger-color);
-    color: white;
-    padding: 0.4rem 0.8rem;
-    font-size: 0.9rem;
-}
-
-.btn-danger:hover {
-    background-color: #c82333;
-}
-
-.btn-score {
-    background-color: var(--accent-color);
-    color: white;
-    padding: 0.5rem 1rem;
-}
-
-.btn-score:hover {
-    background-color: #e09000;
-}
-
-.quick-actions {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-    flex-wrap: wrap;
-}
-
-/* チーム管理 */
+/* ===================================
+   チーム管理
+   =================================== */
 .team-form {
     display: flex;
     gap: 1rem;
@@ -252,15 +422,17 @@ h3 {
 .team-form input {
     flex: 1;
     min-width: 200px;
-    padding: 0.75rem;
+    padding: 1rem 1.5rem;
     border: 2px solid var(--border-color);
-    border-radius: 8px;
+    border-radius: 50px;
     font-size: 1rem;
+    transition: all 0.3s ease;
 }
 
 .team-form input:focus {
     outline: none;
-    border-color: var(--primary-color);
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 4px rgba(72, 187, 120, 0.1);
 }
 
 .team-list ul {
@@ -271,196 +443,251 @@ h3 {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem;
-    background: var(--background-color);
-    margin-bottom: 0.5rem;
-    border-radius: 8px;
-    border-left: 4px solid var(--primary-color);
+    padding: 1rem 1.5rem;
+    margin-bottom: 0.75rem;
+    background: linear-gradient(145deg, #ffffff, #f8fafc);
+    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.team-list li:hover {
+    transform: translateX(5px);
+    box-shadow: var(--box-shadow-sm);
+    border-color: var(--secondary-color);
 }
 
 .team-list li span {
     font-weight: 600;
+    font-size: 1.1rem;
 }
 
 .generate-schedule {
     margin-top: 2rem;
     text-align: center;
+    padding-top: 2rem;
+    border-top: 1px dashed var(--border-color);
 }
 
-/* 試合スケジュール */
+/* ===================================
+   試合カード
+   =================================== */
 .schedule-list {
-    display: grid;
+    display: flex;
+    flex-direction: column;
     gap: 1rem;
 }
 
 .match-card {
-    background: var(--background-color);
-    border-radius: 10px;
-    padding: 1.5rem;
     display: grid;
     grid-template-columns: 1fr auto 1fr auto;
     align-items: center;
     gap: 1rem;
-    border-left: 4px solid var(--primary-color);
+    padding: 1.25rem 1.5rem;
+    background: linear-gradient(145deg, #ffffff, #f8fafc);
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    transition: all 0.3s ease;
+}
+
+.match-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--box-shadow-sm);
 }
 
 .match-card.completed {
-    border-left-color: var(--success-color);
-    background: linear-gradient(90deg, rgba(40, 167, 69, 0.1), var(--background-color));
+    border-color: var(--success-color);
+    background: linear-gradient(145deg, #f0fff4, #c6f6d5);
 }
 
-.match-number {
-    position: absolute;
-    top: -10px;
-    left: 10px;
-    background: var(--primary-color);
-    color: white;
-    padding: 0.2rem 0.5rem;
-    border-radius: 4px;
-    font-size: 0.8rem;
-}
-
-.team-name {
+.match-card .team-name {
     font-weight: 600;
     font-size: 1.1rem;
 }
 
-.team-name.home {
+.match-card .team-name.home {
     text-align: right;
 }
 
-.team-name.away {
+.match-card .team-name.away {
     text-align: left;
 }
 
 .score-display {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    font-size: 1.5rem;
-    font-weight: bold;
+    gap: 0.75rem;
+    padding: 0.5rem 1rem;
+    background: var(--primary-color);
+    border-radius: 50px;
+    color: white;
 }
 
 .score-display .score {
-    background: var(--primary-color);
-    color: white;
-    padding: 0.3rem 0.8rem;
-    border-radius: 5px;
-    min-width: 40px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    min-width: 2rem;
     text-align: center;
 }
 
 .score-display .score.winner {
-    background: var(--accent-color);
+    color: var(--warning-color);
+    text-shadow: 0 0 10px rgba(236, 201, 75, 0.5);
 }
 
 .score-display .vs {
-    color: var(--text-light);
-    font-size: 1rem;
+    font-size: 0.9rem;
+    opacity: 0.7;
 }
 
-/* 順位表 */
+/* ===================================
+   順位表
+   =================================== */
 .standings-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     margin-bottom: 2rem;
+    overflow: hidden;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow-sm);
 }
 
 .standings-table th,
 .standings-table td {
-    padding: 0.75rem;
+    padding: 1rem;
     text-align: center;
     border-bottom: 1px solid var(--border-color);
 }
 
-.standings-table th {
-    background-color: var(--primary-color);
+.standings-table thead th {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
     color: white;
     font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
-/* 勝ち点列を強調 */
-.standings-table th:nth-child(3) {
-    background-color: var(--accent-color);
-}
-
-.standings-table td:nth-child(3) {
-    color: var(--accent-color);
-    font-size: 1.1rem;
+.standings-table tbody tr {
+    background: white;
+    transition: all 0.3s ease;
 }
 
 .standings-table tbody tr:hover {
-    background-color: rgba(44, 95, 45, 0.1);
+    background: linear-gradient(145deg, #f7fafc, #edf2f7);
+    transform: scale(1.01);
 }
 
-.standings-table tbody tr:nth-child(1) td:first-child {
-    background: gold;
-    font-weight: bold;
+.standings-table tbody tr:nth-child(even) {
+    background: #f8fafc;
 }
 
-.standings-table tbody tr:nth-child(2) td:first-child {
-    background: silver;
-    font-weight: bold;
+.standings-table tbody tr:nth-child(even):hover {
+    background: linear-gradient(145deg, #edf2f7, #e2e8f0);
 }
 
+/* 順位メダル */
+.standings-table tbody tr:nth-child(1) td:first-child,
+.standings-table tbody tr:nth-child(2) td:first-child,
 .standings-table tbody tr:nth-child(3) td:first-child {
-    background: #cd7f32;
-    font-weight: bold;
+    position: relative;
+    color: transparent;
+}
+
+.standings-table tbody tr:nth-child(1) td:first-child::before {
+    content: '🥇';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5rem;
+}
+
+.standings-table tbody tr:nth-child(2) td:first-child::before {
+    content: '🥈';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5rem;
+}
+
+.standings-table tbody tr:nth-child(3) td:first-child::before {
+    content: '🥉';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5rem;
 }
 
 /* 対戦表 */
 .matchup-table-container {
     overflow-x: auto;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow-sm);
 }
 
 .matchup-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     min-width: 400px;
 }
 
 .matchup-table th,
 .matchup-table td {
-    padding: 0.5rem;
+    padding: 0.75rem;
     text-align: center;
     border: 1px solid var(--border-color);
-    min-width: 60px;
+    min-width: 70px;
+    transition: all 0.3s ease;
 }
 
 .matchup-table th {
-    background-color: var(--primary-color);
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
     color: white;
+    font-weight: 600;
 }
 
 .matchup-table .team-header {
-    background-color: var(--secondary-color);
-    color: var(--primary-dark);
+    background: linear-gradient(145deg, #edf2f7, #e2e8f0);
+    color: var(--primary-color);
     font-weight: 600;
 }
 
 .matchup-table .win {
-    background-color: rgba(40, 167, 69, 0.2);
+    background: linear-gradient(145deg, #c6f6d5, #9ae6b4);
     color: var(--success-color);
-    font-weight: bold;
+    font-weight: 700;
 }
 
 .matchup-table .lose {
-    background-color: rgba(220, 53, 69, 0.2);
+    background: linear-gradient(145deg, #fed7d7, #feb2b2);
     color: var(--danger-color);
-    font-weight: bold;
+    font-weight: 700;
 }
 
 .matchup-table .draw {
-    background-color: rgba(255, 193, 7, 0.2);
-    color: #856404;
-    font-weight: bold;
+    background: linear-gradient(145deg, #fefcbf, #faf089);
+    color: #744210;
+    font-weight: 700;
 }
 
 .matchup-table .diagonal {
-    background-color: var(--text-light);
+    background: repeating-linear-gradient(
+        45deg,
+        #e2e8f0,
+        #e2e8f0 5px,
+        #edf2f7 5px,
+        #edf2f7 10px
+    );
 }
 
-/* モーダル */
+/* ===================================
+   モーダル
+   =================================== */
 .modal {
     display: none;
     position: fixed;
@@ -469,9 +696,16 @@ h3 {
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
     align-items: center;
     justify-content: center;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 .modal.active {
@@ -480,36 +714,63 @@ h3 {
 
 .modal-content {
     background: var(--card-background);
-    padding: 2rem;
-    border-radius: 12px;
+    padding: 2.5rem;
+    border-radius: var(--border-radius);
     max-width: 500px;
     width: 90%;
     position: relative;
+    animation: slideUp 0.3s ease;
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 .modal-content h2 {
     border-bottom: none;
     text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.modal-content h2::after {
+    display: none;
 }
 
 .close {
     position: absolute;
     top: 1rem;
-    right: 1rem;
-    font-size: 1.5rem;
+    right: 1.5rem;
+    font-size: 2rem;
     cursor: pointer;
     color: var(--text-light);
+    transition: all 0.3s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
 }
 
 .close:hover {
-    color: var(--text-color);
+    color: var(--danger-color);
+    background: rgba(245, 101, 101, 0.1);
+    transform: rotate(90deg);
 }
 
 .score-input-form {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 1rem;
+    gap: 1.5rem;
     margin: 2rem 0;
 }
 
@@ -519,28 +780,31 @@ h3 {
 
 .team-score label {
     display: block;
-    margin-bottom: 0.5rem;
     font-weight: 600;
+    margin-bottom: 0.75rem;
     color: var(--primary-color);
 }
 
 .team-score input {
-    width: 80px;
+    width: 100px;
     padding: 1rem;
-    font-size: 1.5rem;
+    font-size: 2rem;
+    font-weight: 700;
     text-align: center;
-    border: 2px solid var(--border-color);
-    border-radius: 8px;
+    border: 3px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    transition: all 0.3s ease;
 }
 
 .team-score input:focus {
     outline: none;
-    border-color: var(--primary-color);
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 4px rgba(72, 187, 120, 0.2);
 }
 
 .vs {
-    font-size: 1.2rem;
-    font-weight: bold;
+    font-size: 1.5rem;
+    font-weight: 700;
     color: var(--text-light);
 }
 
@@ -548,6 +812,7 @@ h3 {
     display: flex;
     gap: 1rem;
     justify-content: center;
+    margin-top: 1.5rem;
 }
 
 /* フォームグループ */
@@ -557,175 +822,127 @@ h3 {
 
 .form-group label {
     display: block;
-    margin-bottom: 0.5rem;
     font-weight: 600;
+    margin-bottom: 0.5rem;
     color: var(--primary-color);
 }
 
-.form-group input {
+.form-group input[type="text"],
+.form-group input[type="date"] {
     width: 100%;
-    padding: 0.75rem;
+    padding: 1rem 1.25rem;
     border: 2px solid var(--border-color);
-    border-radius: 8px;
+    border-radius: var(--border-radius-sm);
     font-size: 1rem;
+    transition: all 0.3s ease;
 }
 
 .form-group input:focus {
     outline: none;
-    border-color: var(--primary-color);
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 4px rgba(72, 187, 120, 0.1);
 }
 
-/* 警告テキスト */
-.warning-text {
-    text-align: center;
-    color: var(--danger-color);
-    margin: 1rem 0;
-    line-height: 1.8;
-}
-
-.delete-target {
-    text-align: center;
-    font-weight: bold;
-    font-size: 1.2rem;
-    color: var(--text-color);
-    padding: 1rem;
-    background: var(--background-color);
-    border-radius: 8px;
-    margin-bottom: 1rem;
-}
-
-/* フッター */
-footer {
-    background-color: var(--primary-dark);
-    color: white;
-    text-align: center;
-    padding: 1rem;
-    margin-top: 2rem;
-}
-
-/* レスポンシブデザイン */
-@media (max-width: 768px) {
-    header h1 {
-        font-size: 1.4rem;
-    }
-
-    nav ul {
-        gap: 0.25rem;
-    }
-
-    nav ul li a {
-        padding: 0.4rem 0.8rem;
-        font-size: 0.9rem;
-    }
-
-    main {
-        padding: 1rem;
-    }
-
-    .container {
-        padding: 1rem;
-    }
-
-    .match-card {
-        grid-template-columns: 1fr;
-        text-align: center;
-        gap: 0.5rem;
-    }
-
-    .team-name.home,
-    .team-name.away {
-        text-align: center;
-    }
-
-    .score-display {
-        justify-content: center;
-    }
-
-    .team-form {
-        flex-direction: column;
-    }
-
-    .team-form input {
-        width: 100%;
-    }
-
-    .standings-table {
-        font-size: 0.85rem;
-    }
-
-    .standings-table th,
-    .standings-table td {
-        padding: 0.5rem 0.25rem;
-    }
-}
-
-/* アニメーション */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.page.active {
-    animation: fadeIn 0.3s ease;
-}
-
-.match-card {
-    animation: fadeIn 0.3s ease;
-}
-
-/* 空の状態 */
-.empty-state {
-    text-align: center;
-    padding: 3rem;
-    color: var(--text-light);
-}
-
-.empty-state p {
-    margin-bottom: 1rem;
-}
-
-/* ===================================
-   対抗戦モード用スタイル
-   =================================== */
-
-/* ラジオボタングループ */
+/* ラジオボタン */
 .radio-group {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.75rem;
 }
 
 .radio-label {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
     cursor: pointer;
-    padding: 0.5rem;
-    border-radius: 5px;
-    transition: background-color 0.2s;
+    transition: all 0.3s ease;
 }
 
 .radio-label:hover {
-    background-color: var(--background-color);
+    border-color: var(--secondary-color);
+    background: rgba(72, 187, 120, 0.05);
 }
 
 .radio-label input[type="radio"] {
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
+    accent-color: var(--secondary-color);
 }
+
+.radio-label input[type="radio"]:checked + span {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+/* 削除確認 */
+.warning-text {
+    text-align: center;
+    color: var(--text-light);
+    margin-bottom: 1rem;
+}
+
+.delete-target {
+    text-align: center;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--danger-color);
+    padding: 1rem;
+    background: rgba(245, 101, 101, 0.1);
+    border-radius: var(--border-radius-sm);
+    margin-bottom: 1.5rem;
+}
+
+/* ===================================
+   クイックアクション
+   =================================== */
+.quick-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px dashed var(--border-color);
+}
+
+/* ===================================
+   空状態
+   =================================== */
+.empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--text-light);
+}
+
+.empty-state p {
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+}
+
+/* ===================================
+   フッター
+   =================================== */
+footer {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-light);
+    background: white;
+    margin-top: 2rem;
+    border-top: 1px solid var(--border-color);
+}
+
+/* ===================================
+   対抗戦モード
+   =================================== */
 
 /* 陣営コンテナ */
 .camp-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 2rem;
-    margin-bottom: 2rem;
 }
 
 @media (max-width: 768px) {
@@ -736,330 +953,63 @@ footer {
 
 .camp-section {
     padding: 1.5rem;
-    border-radius: 12px;
-    border: 3px solid;
+    border-radius: var(--border-radius);
+    border: 2px solid;
+    position: relative;
+    overflow: hidden;
+}
+
+.camp-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
 }
 
 .camp-section.camp-a {
-    border-color: #e74c3c;
-    background: linear-gradient(135deg, rgba(231, 76, 60, 0.1), rgba(231, 76, 60, 0.05));
+    border-color: var(--camp-a-color);
+    background: linear-gradient(180deg, var(--camp-a-bg) 0%, transparent 100%);
+}
+
+.camp-section.camp-a::before {
+    background: linear-gradient(90deg, var(--camp-a-color), var(--camp-a-light));
 }
 
 .camp-section.camp-b {
-    border-color: #3498db;
-    background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), rgba(52, 152, 219, 0.05));
+    border-color: var(--camp-b-color);
+    background: linear-gradient(180deg, var(--camp-b-bg) 0%, transparent 100%);
+}
+
+.camp-section.camp-b::before {
+    background: linear-gradient(90deg, var(--camp-b-color), var(--camp-b-light));
 }
 
 .camp-section h3 {
-    margin-bottom: 1rem;
     text-align: center;
-}
-
-.camp-name-input {
-    margin-bottom: 1rem;
-}
-
-.camp-name-input input {
-    width: 100%;
-    padding: 0.5rem;
-    border: 2px solid var(--border-color);
-    border-radius: 5px;
-    text-align: center;
-    font-weight: 600;
+    margin-bottom: 1.25rem;
 }
 
 .camp-team-list {
     list-style: none;
-    margin-top: 1rem;
+    min-height: 100px;
 }
 
 .camp-team-list li {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.75rem;
+    padding: 0.875rem 1rem;
+    margin-bottom: 0.5rem;
     background: white;
-    margin-bottom: 0.5rem;
-    border-radius: 5px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    border-radius: var(--border-radius-sm);
+    box-shadow: var(--box-shadow-sm);
+    transition: all 0.3s ease;
 }
 
-/* 対抗戦アクション */
-.taiko-actions {
-    text-align: center;
-    margin-top: 2rem;
-    padding-top: 1rem;
-    border-top: 2px dashed var(--border-color);
-}
-
-/* フェーズタブ */
-.taiko-phase-tabs {
-    display: flex;
-    gap: 0.5rem;
-    margin-bottom: 1.5rem;
-    border-bottom: 2px solid var(--border-color);
-    padding-bottom: 0.5rem;
-}
-
-.phase-tab {
-    padding: 0.75rem 1.5rem;
-    border: none;
-    background: var(--background-color);
-    border-radius: 8px 8px 0 0;
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.3s;
-}
-
-.phase-tab:hover {
-    background: var(--secondary-color);
-}
-
-.phase-tab.active {
-    background: var(--primary-color);
-    color: white;
-}
-
-/* 陣営別スケジュール */
-.camp-schedules {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-}
-
-@media (max-width: 768px) {
-    .camp-schedules {
-        grid-template-columns: 1fr;
-    }
-}
-
-.camp-schedule {
-    padding: 1rem;
-    border-radius: 8px;
-    background: var(--background-color);
-}
-
-.camp-schedule h3 {
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 2px solid var(--primary-color);
-}
-
-/* 本戦対決 */
-.final-matchups h3 {
-    text-align: center;
-    margin-bottom: 1.5rem;
-    font-size: 1.5rem;
-}
-
-.final-match-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.final-match-card {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr auto;
-    align-items: center;
-    gap: 1rem;
-    padding: 1.5rem;
-    background: linear-gradient(135deg, rgba(231, 76, 60, 0.1), rgba(52, 152, 219, 0.1));
-    border-radius: 12px;
-    border: 2px solid var(--border-color);
-}
-
-.final-match-card.completed {
-    border-color: var(--success-color);
-}
-
-.final-match-card .role-badge {
-    display: inline-block;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-}
-
-.role-badge.taisho { background: gold; color: #333; }
-.role-badge.fukusho { background: silver; color: #333; }
-.role-badge.jiho { background: #cd7f32; color: white; }
-.role-badge.senpo { background: #8b4513; color: white; }
-
-.final-team {
-    text-align: center;
-}
-
-.final-team.camp-a {
-    color: #e74c3c;
-}
-
-.final-team.camp-b {
-    color: #3498db;
-}
-
-.final-team .team-name {
-    font-size: 1.1rem;
-    font-weight: 600;
-}
-
-/* 対抗戦結果 */
-.taiko-result {
-    margin-top: 2rem;
-    padding: 2rem;
-    border-radius: 12px;
-    text-align: center;
-    font-size: 1.5rem;
-    font-weight: bold;
-}
-
-.taiko-result.camp-a-win {
-    background: linear-gradient(135deg, #e74c3c, #c0392b);
-    color: white;
-}
-
-.taiko-result.camp-b-win {
-    background: linear-gradient(135deg, #3498db, #2980b9);
-    color: white;
-}
-
-.taiko-result.draw {
-    background: linear-gradient(135deg, #f1c40f, #f39c12);
-    color: #333;
-}
-
-.taiko-result .result-detail {
-    font-size: 1rem;
-    margin-top: 0.5rem;
-    opacity: 0.9;
-}
-
-/* 陣営別順位表 */
-.camp-standings {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-}
-
-@media (max-width: 768px) {
-    .camp-standings {
-        grid-template-columns: 1fr;
-    }
-}
-
-.camp-standing {
-    padding: 1rem;
-    border-radius: 8px;
-    background: var(--background-color);
-}
-
-.camp-standing h3 {
-    margin-bottom: 1rem;
-}
-
-.camp-standing .standings-table {
-    margin-bottom: 0;
-}
-
-/* 対抗戦結果コンテナ */
-.taiko-result {
-    margin-top: 2rem;
-    padding: 2rem;
-    border-radius: 12px;
-    text-align: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-}
-
-.taiko-result h3 {
-    margin-bottom: 1rem;
-    font-size: 1.2rem;
-}
-
-.taiko-result-score {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 1rem;
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
-}
-
-.taiko-result-score .camp-name {
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    font-weight: 600;
-}
-
-.taiko-result-score .camp-name.camp-a {
-    background: rgba(231, 76, 60, 0.8);
-}
-
-.taiko-result-score .camp-name.camp-b {
-    background: rgba(52, 152, 219, 0.8);
-}
-
-.taiko-result-score .score-large {
-    font-size: 2.5rem;
-    font-weight: bold;
-}
-
-.taiko-result-score .vs {
-    font-size: 1rem;
-    opacity: 0.8;
-}
-
-.taiko-result-winner {
-    font-size: 1.5rem;
-    font-weight: bold;
-}
-
-/* 決勝戦カード詳細 */
-.final-match-card {
-    background: var(--card-background);
-    border: 2px solid var(--border-color);
-    border-radius: 12px;
-    padding: 1rem;
-    margin-bottom: 1rem;
-}
-
-.final-match-card.completed {
-    border-color: var(--success-color);
-}
-
-.final-match-role {
-    text-align: center;
-    margin-bottom: 0.5rem;
-}
-
-.final-match-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-}
-
-.final-match-content .camp-label {
-    font-size: 0.75rem;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-}
-
-.camp-label.camp-a {
-    background: rgba(231, 76, 60, 0.2);
-    color: #e74c3c;
-}
-
-.camp-label.camp-b {
-    background: rgba(52, 152, 219, 0.2);
-    color: #3498db;
-}
-
-.final-match-content .team-name {
-    font-weight: 600;
-    min-width: 80px;
+.camp-team-list li:hover {
+    transform: translateX(5px);
 }
 
 /* 陣営名入力 */
@@ -1071,14 +1021,86 @@ footer {
 
 .camp-name-input input {
     flex: 1;
-    padding: 0.5rem;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    font-size: 1rem;
+    transition: all 0.3s ease;
 }
 
-.btn-small {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.85rem;
+.camp-name-input input:focus {
+    outline: none;
+    border-color: var(--secondary-color);
+}
+
+/* 役職バッジ */
+.role-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.role-badge.taisho {
+    background: linear-gradient(135deg, #ffd700, #ffed4a);
+    color: #744210;
+    box-shadow: 0 2px 10px rgba(255, 215, 0, 0.4);
+}
+
+.role-badge.fukusho {
+    background: linear-gradient(135deg, #c0c0c0, #e2e8f0);
+    color: #4a5568;
+    box-shadow: 0 2px 10px rgba(192, 192, 192, 0.4);
+}
+
+.role-badge.jiho {
+    background: linear-gradient(135deg, #cd7f32, #d69e2e);
+    color: white;
+    box-shadow: 0 2px 10px rgba(205, 127, 50, 0.4);
+}
+
+.role-badge.senpo {
+    background: linear-gradient(135deg, #718096, #a0aec0);
+    color: white;
+    box-shadow: 0 2px 10px rgba(113, 128, 150, 0.4);
+}
+
+/* フェーズタブ */
+.taiko-phase-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    background: var(--background-color);
+    padding: 0.5rem;
+    border-radius: 50px;
+    justify-content: center;
+}
+
+.phase-tab {
+    padding: 0.875rem 2rem;
+    border: none;
+    border-radius: 50px;
+    background: transparent;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: var(--text-light);
+}
+
+.phase-tab:hover {
+    background: rgba(255, 255, 255, 0.5);
+    color: var(--primary-color);
+}
+
+.phase-tab.active {
+    background: white;
+    color: var(--primary-color);
+    box-shadow: var(--box-shadow-sm);
 }
 
 /* 陣営スケジュール */
@@ -1095,21 +1117,23 @@ footer {
 }
 
 .camp-schedule {
-    padding: 1rem;
-    border-radius: 8px;
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    border: 2px solid;
 }
 
 .camp-schedule.camp-a {
-    background: rgba(231, 76, 60, 0.05);
-    border: 1px solid rgba(231, 76, 60, 0.2);
+    border-color: var(--camp-a-color);
+    background: var(--camp-a-bg);
 }
 
 .camp-schedule.camp-b {
-    background: rgba(52, 152, 219, 0.05);
-    border: 1px solid rgba(52, 152, 219, 0.2);
+    border-color: var(--camp-b-color);
+    background: var(--camp-b-bg);
 }
 
 .camp-schedule h3 {
+    text-align: center;
     margin-bottom: 1rem;
 }
 
@@ -1117,27 +1141,279 @@ footer {
 .taiko-actions {
     margin-top: 2rem;
     text-align: center;
+    padding-top: 2rem;
+    border-top: 1px dashed var(--border-color);
 }
 
-.taiko-actions button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+/* 決勝戦 */
+.final-matchups {
+    background: linear-gradient(145deg, #f7fafc, #edf2f7);
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    border: 2px solid var(--border-color);
 }
 
-/* 決勝戦リスト */
+.final-matchups h3 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+}
+
 .final-match-list {
     display: flex;
     flex-direction: column;
     gap: 1rem;
 }
 
-.final-matchups {
-    background: var(--card-background);
-    padding: 1.5rem;
-    border-radius: 12px;
+.final-match-card {
+    background: white;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 1.25rem;
+    transition: all 0.3s ease;
 }
 
-.final-matchups h3 {
+.final-match-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--box-shadow-sm);
+}
+
+.final-match-card.completed {
+    border-color: var(--success-color);
+    background: linear-gradient(145deg, #f0fff4, #c6f6d5);
+}
+
+.final-match-role {
+    text-align: center;
+    margin-bottom: 0.75rem;
+}
+
+.final-match-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.final-match-content .camp-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.375rem 0.75rem;
+    border-radius: 50px;
+}
+
+.camp-label.camp-a {
+    background: var(--camp-a-bg);
+    color: var(--camp-a-color);
+    border: 1px solid var(--camp-a-color);
+}
+
+.camp-label.camp-b {
+    background: var(--camp-b-bg);
+    color: var(--camp-b-color);
+    border: 1px solid var(--camp-b-color);
+}
+
+.final-match-content .team-name {
+    font-weight: 600;
+    min-width: 80px;
+    text-align: center;
+}
+
+/* 対抗戦結果 */
+.taiko-result {
+    margin-top: 2rem;
+    padding: 2.5rem;
+    border-radius: var(--border-radius);
+    text-align: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 10px 40px rgba(102, 126, 234, 0.4);
+}
+
+.taiko-result h3 {
+    color: white;
+    margin-bottom: 1.5rem;
+    font-size: 1.25rem;
+    opacity: 0.9;
+}
+
+.taiko-result-score {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.taiko-result-score .camp-name {
+    padding: 0.75rem 1.5rem;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.taiko-result-score .camp-name.camp-a {
+    background: rgba(229, 62, 62, 0.9);
+}
+
+.taiko-result-score .camp-name.camp-b {
+    background: rgba(49, 130, 206, 0.9);
+}
+
+.taiko-result-score .score-large {
+    font-size: 3rem;
+    font-weight: 900;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.taiko-result-score .vs {
+    font-size: 1.25rem;
+    opacity: 0.7;
+}
+
+.taiko-result-winner {
+    font-size: 1.75rem;
+    font-weight: 900;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* 陣営別順位表 */
+.camp-standings {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+@media (max-width: 768px) {
+    .camp-standings {
+        grid-template-columns: 1fr;
+    }
+}
+
+.camp-standing {
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    border: 2px solid;
+}
+
+.camp-standing.camp-a {
+    border-color: var(--camp-a-color);
+    background: var(--camp-a-bg);
+}
+
+.camp-standing.camp-b {
+    border-color: var(--camp-b-color);
+    background: var(--camp-b-bg);
+}
+
+.camp-standing h3 {
     text-align: center;
     margin-bottom: 1rem;
+}
+
+.camp-standing .standings-table {
+    margin-bottom: 0;
+}
+
+/* ===================================
+   レスポンシブ
+   =================================== */
+@media (max-width: 768px) {
+    header {
+        padding: 1rem;
+    }
+    
+    header h1 {
+        font-size: 1.4rem;
+    }
+    
+    main {
+        padding: 1rem;
+    }
+    
+    .container {
+        padding: 1.25rem;
+    }
+    
+    .tournament-info {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .match-card {
+        grid-template-columns: 1fr;
+        text-align: center;
+        gap: 0.75rem;
+    }
+    
+    .match-card .team-name.home,
+    .match-card .team-name.away {
+        text-align: center;
+    }
+    
+    .score-input-form {
+        flex-direction: column;
+    }
+    
+    .quick-actions {
+        flex-direction: column;
+    }
+    
+    .quick-actions .btn {
+        width: 100%;
+    }
+    
+    nav ul {
+        gap: 0.25rem;
+    }
+    
+    nav ul li a {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .tournament-info {
+        grid-template-columns: 1fr;
+    }
+    
+    .team-form {
+        flex-direction: column;
+    }
+    
+    .team-form input,
+    .team-form .btn {
+        width: 100%;
+    }
+}
+
+/* ===================================
+   スクロールバー
+   =================================== */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--background-color);
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-dark);
+}
+
+/* ===================================
+   セレクション
+   =================================== */
+::selection {
+    background: var(--secondary-color);
+    color: white;
 }
