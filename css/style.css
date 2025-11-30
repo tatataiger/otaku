@@ -1316,13 +1316,26 @@ footer {
 
 .camp-standing .standings-table {
     margin-bottom: 0;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
 }
 
 .camp-standing .standings-table th,
 .camp-standing .standings-table td {
-    padding: 0.6rem 0.4rem;
-    white-space: nowrap;
+    padding: 0.75rem 0.5rem;
+}
+
+/* コンパクトテーブル */
+.standings-table.compact {
+    width: 100%;
+}
+
+.standings-table.compact th,
+.standings-table.compact td {
+    padding: 0.75rem 0.5rem;
+}
+
+.standings-table.compact td:nth-child(2) {
+    text-align: left;
 }
 
 /* ===================================

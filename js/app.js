@@ -1285,27 +1285,22 @@ function updateCampStandings(camp) {
     const stats = tournament.getCampTeamStats(camp);
     
     if (stats.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="11" class="empty-state">チームが登録されていません</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">チームが登録されていません</td></tr>';
         return;
     }
     
     tbody.innerHTML = stats.map((team, index) => {
         const roleClass = team.role ? getRoleBadgeClass(team.role) : '';
         const roleHtml = team.role ? `<span class="role-badge ${roleClass}">${team.role}</span>` : '';
+        const runDiffStr = team.runDiff > 0 ? `+${team.runDiff}` : team.runDiff;
         
         return `
             <tr>
                 <td>${index + 1}</td>
                 <td>${team.name} ${roleHtml}</td>
                 <td><strong>${team.points}</strong></td>
-                <td>${team.played}</td>
-                <td>${team.wins}</td>
-                <td>${team.losses}</td>
-                <td>${team.draws}</td>
-                <td>${(team.winRate * 100).toFixed(1)}%</td>
-                <td>${team.runsFor}</td>
-                <td>${team.runsAgainst}</td>
-                <td>${team.runDiff > 0 ? '+' : ''}${team.runDiff}</td>
+                <td>${team.wins}-${team.losses}-${team.draws}</td>
+                <td>${runDiffStr}</td>
             </tr>
         `;
     }).join('');
