@@ -534,6 +534,7 @@ class TournamentManager {
         return Object.values(stats)
             .map(s => {
                 s.runDiff = s.runsFor - s.runsAgainst;
+                s.winRate = s.played > 0 ? (s.wins / s.played) : 0;
                 return s;
             })
             .sort((a, b) => {
