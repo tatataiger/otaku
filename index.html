@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>草野球大会 スコア管理システム</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <h1>🥎 草野球大会 スコア管理システム</h1>
+        <nav>
+            <ul>
+                <li><a href="#" class="nav-link active" data-page="home">ホーム</a></li>
+                <li><a href="#" class="nav-link" data-page="teams">チーム管理</a></li>
+                <li><a href="#" class="nav-link" data-page="schedule">試合スケジュール</a></li>
+                <li><a href="#" class="nav-link" data-page="standings">順位表</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <!-- ホームページ -->
+        <section id="home" class="page active">
+            <div class="container">
+                <h2>大会情報</h2>
+                <div class="tournament-info">
+                    <div class="info-card">
+                        <h3>大会名</h3>
+                        <input type="text" id="tournamentName" placeholder="大会名を入力">
+                    </div>
+                    <div class="info-card">
+                        <h3>開催日</h3>
+                        <input type="date" id="tournamentDate">
+                    </div>
+                    <div class="info-card">
+                        <h3>登録チーム数</h3>
+                        <span id="teamCount">0</span> チーム
+                    </div>
+                    <div class="info-card">
+                        <h3>試合数</h3>
+                        <span id="matchCount">0</span> 試合
+                    </div>
+                </div>
+                <div class="quick-actions">
+                    <button class="btn btn-primary" onclick="showPage('teams')">チームを登録する</button>
+                    <button class="btn btn-secondary" onclick="showPage('schedule')">試合スケジュールを見る</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- チーム管理ページ -->
+        <section id="teams" class="page">
+            <div class="container">
+                <h2>チーム管理</h2>
+                <div class="team-form">
+                    <input type="text" id="teamName" placeholder="チーム名を入力">
+                    <button class="btn btn-primary" onclick="addTeam()">チームを追加</button>
+                </div>
+                <div class="team-list">
+                    <h3>登録チーム一覧</h3>
+                    <ul id="teamList"></ul>
+                </div>
+                <div class="generate-schedule">
+                    <button class="btn btn-success" onclick="generateSchedule()">総当たり戦スケジュールを生成</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 試合スケジュールページ -->
+        <section id="schedule" class="page">
+            <div class="container">
+                <h2>試合スケジュール</h2>
+                <div id="scheduleList" class="schedule-list"></div>
+            </div>
+        </section>
+
+        <!-- 順位表ページ -->
+        <section id="standings" class="page">
+            <div class="container">
+                <h2>順位表</h2>
+                <table id="standingsTable" class="standings-table">
+                    <thead>
+                        <tr>
+                            <th>順位</th>
+                            <th>チーム名</th>
+                            <th>試合</th>
+                            <th>勝</th>
+                            <th>敗</th>
+                            <th>引分</th>
+                            <th>勝率</th>
+                            <th>得点</th>
+                            <th>失点</th>
+                            <th>得失点差</th>
+                        </tr>
+                    </thead>
+                    <tbody id="standingsBody"></tbody>
+                </table>
+                
+                <h3 class="section-title">対戦表</h3>
+                <div id="matchupTable" class="matchup-table-container"></div>
+            </div>
+        </section>
+    </main>
+
+    <!-- スコア入力モーダル -->
+    <div id="scoreModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>スコア入力</h2>
+            <div class="score-input-form">
+                <div class="team-score">
+                    <label id="homeTeamLabel">ホームチーム</label>
+                    <input type="number" id="homeScore" min="0" value="0">
+                </div>
+                <div class="vs">VS</div>
+                <div class="team-score">
+                    <label id="awayTeamLabel">アウェイチーム</label>
+                    <input type="number" id="awayScore" min="0" value="0">
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="saveScore()">保存</button>
+                <button class="btn btn-secondary" onclick="closeModal()">キャンセル</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 草野球大会 スコア管理システム</p>
+    </footer>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
