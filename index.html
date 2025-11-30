@@ -45,12 +45,12 @@
                             <input type="date" id="tournamentDate">
                         </div>
                         <div class="info-card">
-                            <h3>登録チーム数</h3>
-                            <span id="teamCount">0</span> チーム
+                            <h3>大会形式</h3>
+                            <span id="tournamentType">通常</span>
                         </div>
                         <div class="info-card">
-                            <h3>試合数</h3>
-                            <span id="matchCount">0</span> 試合
+                            <h3>登録チーム数</h3>
+                            <span id="teamCount">0</span> チーム
                         </div>
                     </div>
                     <div class="quick-actions">
@@ -66,16 +66,57 @@
         <section id="teams" class="page">
             <div class="container">
                 <h2>チーム管理</h2>
-                <div class="team-form">
-                    <input type="text" id="teamName" placeholder="チーム名を入力">
-                    <button class="btn btn-primary" onclick="addTeam()">チームを追加</button>
+                
+                <!-- 通常モード用 -->
+                <div id="normalTeamMode">
+                    <div class="team-form">
+                        <input type="text" id="teamName" placeholder="チーム名を入力">
+                        <button class="btn btn-primary" onclick="addTeam()">チームを追加</button>
+                    </div>
+                    <div class="team-list">
+                        <h3>登録チーム一覧</h3>
+                        <ul id="teamList"></ul>
+                    </div>
+                    <div class="generate-schedule">
+                        <button class="btn btn-success" onclick="generateSchedule()">総当たり戦スケジュールを生成</button>
+                    </div>
                 </div>
-                <div class="team-list">
-                    <h3>登録チーム一覧</h3>
-                    <ul id="teamList"></ul>
-                </div>
-                <div class="generate-schedule">
-                    <button class="btn btn-success" onclick="generateSchedule()">総当たり戦スケジュールを生成</button>
+                
+                <!-- 対抗戦モード用 -->
+                <div id="taikoTeamMode" style="display: none;">
+                    <div class="camp-container">
+                        <!-- 陣営A -->
+                        <div class="camp-section camp-a">
+                            <h3>🔴 陣営A</h3>
+                            <div class="camp-name-input">
+                                <input type="text" id="campAName" placeholder="陣営名（例：東軍）">
+                                <button class="btn btn-small btn-secondary" onclick="saveCampName('A')">保存</button>
+                            </div>
+                            <div class="team-form">
+                                <input type="text" id="teamNameA" placeholder="チーム名を入力">
+                                <button class="btn btn-primary" onclick="addTeamToCamp('A')">追加</button>
+                            </div>
+                            <ul id="teamListA" class="camp-team-list"></ul>
+                        </div>
+                        
+                        <!-- 陣営B -->
+                        <div class="camp-section camp-b">
+                            <h3>🔵 陣営B</h3>
+                            <div class="camp-name-input">
+                                <input type="text" id="campBName" placeholder="陣営名（例：西軍）">
+                                <button class="btn btn-small btn-secondary" onclick="saveCampName('B')">保存</button>
+                            </div>
+                            <div class="team-form">
+                                <input type="text" id="teamNameB" placeholder="チーム名を入力">
+                                <button class="btn btn-primary" onclick="addTeamToCamp('B')">追加</button>
+                            </div>
+                            <ul id="teamListB" class="camp-team-list"></ul>
+                        </div>
+                    </div>
+                    
+                    <div class="taiko-actions">
+                        <button class="btn btn-success" onclick="generateTaikoSchedule()">予選（陣営内総当たり）を開始</button>
+                    </div>
                 </div>
             </div>
         </section>
@@ -84,7 +125,45 @@
         <section id="schedule" class="page">
             <div class="container">
                 <h2>試合スケジュール</h2>
-                <div id="scheduleList" class="schedule-list"></div>
+                
+                <!-- 通常モード用 -->
+                <div id="normalScheduleMode">
+                    <div id="scheduleList" class="schedule-list"></div>
+                </div>
+                
+                <!-- 対抗戦モード用 -->
+                <div id="taikoScheduleMode" style="display: none;">
+                    <div class="taiko-phase-tabs">
+                        <button class="phase-tab active" onclick="showTaikoPhase('preliminary')">予選（陣営内）</button>
+                        <button class="phase-tab" onclick="showTaikoPhase('final')">本戦（対抗戦）</button>
+                    </div>
+                    
+                    <!-- 予選 -->
+                    <div id="preliminaryPhase" class="taiko-phase">
+                        <div class="camp-schedules">
+                            <div class="camp-schedule camp-a">
+                                <h3>🔴 陣営A 予選</h3>
+                                <div id="matchListA" class="schedule-list"></div>
+                            </div>
+                            <div class="camp-schedule camp-b">
+                                <h3>🔵 陣営B 予選</h3>
+                                <div id="matchListB" class="schedule-list"></div>
+                            </div>
+                        </div>
+                        <div class="taiko-actions">
+                            <button id="finalizePreliminaryBtn" class="btn btn-success" onclick="finalizePreliminaryUI()">予選終了 → 役職を確定</button>
+                        </div>
+                    </div>
+                    
+                    <!-- 本戦 -->
+                    <div id="finalPhase" class="taiko-phase" style="display: none;">
+                        <div class="final-matchups">
+                            <h3>⚔️ 本戦対決</h3>
+                            <div id="finalMatchList" class="final-match-list"></div>
+                        </div>
+                        <div id="taikoResultContainer"></div>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -92,27 +171,79 @@
         <section id="standings" class="page">
             <div class="container">
                 <h2>順位表</h2>
-                <table id="standingsTable" class="standings-table">
-                    <thead>
-                        <tr>
-                            <th>順位</th>
-                            <th>チーム名</th>
-                            <th>勝点</th>
-                            <th>試合</th>
-                            <th>勝</th>
-                            <th>敗</th>
-                            <th>引分</th>
-                            <th>勝率</th>
-                            <th>得点</th>
-                            <th>失点</th>
-                            <th>得失点差</th>
-                        </tr>
-                    </thead>
-                    <tbody id="standingsBody"></tbody>
-                </table>
                 
-                <h3 class="section-title">対戦表</h3>
-                <div id="matchupTable" class="matchup-table-container"></div>
+                <!-- 通常モード用 -->
+                <div id="normalStandingsMode">
+                    <table id="standingsTable" class="standings-table">
+                        <thead>
+                            <tr>
+                                <th>順位</th>
+                                <th>チーム名</th>
+                                <th>勝点</th>
+                                <th>試合</th>
+                                <th>勝</th>
+                                <th>敗</th>
+                                <th>引分</th>
+                                <th>勝率</th>
+                                <th>得点</th>
+                                <th>失点</th>
+                                <th>得失点差</th>
+                            </tr>
+                        </thead>
+                        <tbody id="standingsBody"></tbody>
+                    </table>
+                    
+                    <h3 class="section-title">対戦表</h3>
+                    <div id="matchupTable" class="matchup-table-container"></div>
+                </div>
+                
+                <!-- 対抗戦モード用 -->
+                <div id="taikoStandingsMode" style="display: none;">
+                    <div class="camp-standings">
+                        <div class="camp-standing camp-a">
+                            <h3>🔴 陣営A 順位</h3>
+                            <table class="standings-table">
+                                <thead>
+                                    <tr>
+                                        <th>順位</th>
+                                        <th>チーム名</th>
+                                        <th>勝点</th>
+                                        <th>試合</th>
+                                        <th>勝</th>
+                                        <th>敗</th>
+                                        <th>引分</th>
+                                        <th>勝率</th>
+                                        <th>得点</th>
+                                        <th>失点</th>
+                                        <th>得失点差</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="standingsBodyA"></tbody>
+                            </table>
+                        </div>
+                        <div class="camp-standing camp-b">
+                            <h3>🔵 陣営B 順位</h3>
+                            <table class="standings-table">
+                                <thead>
+                                    <tr>
+                                        <th>順位</th>
+                                        <th>チーム名</th>
+                                        <th>勝点</th>
+                                        <th>試合</th>
+                                        <th>勝</th>
+                                        <th>敗</th>
+                                        <th>引分</th>
+                                        <th>勝率</th>
+                                        <th>得点</th>
+                                        <th>失点</th>
+                                        <th>得失点差</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="standingsBodyB"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
     </main>
@@ -153,9 +284,68 @@
                 <label for="newTournamentDate">開催日</label>
                 <input type="date" id="newTournamentDate">
             </div>
+            <div class="form-group">
+                <label>大会形式</label>
+                <div class="radio-group">
+                    <label class="radio-label">
+                        <input type="radio" name="tournamentType" id="tournamentTypeNormal" value="normal" checked>
+                        <span>🏆 通常総当たり戦</span>
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="tournamentType" id="tournamentTypeTaiko" value="taiko">
+                        <span>⚔️ 対抗戦（陣営別）</span>
+                    </label>
+                </div>
+            </div>
             <div class="modal-actions">
                 <button class="btn btn-primary" onclick="createNewTournament()">作成</button>
                 <button class="btn btn-secondary" onclick="closeNewTournamentModal()">キャンセル</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 予選スコア入力モーダル -->
+    <div id="campScoreModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeCampScoreModal()">&times;</span>
+            <h2 id="campScoreModalTitle">予選スコア入力</h2>
+            <div class="score-input-form">
+                <div class="team-score">
+                    <label id="campHomeTeamLabel">ホームチーム</label>
+                    <input type="number" id="campHomeScore" min="0" value="0">
+                </div>
+                <div class="vs">VS</div>
+                <div class="team-score">
+                    <label id="campAwayTeamLabel">アウェイチーム</label>
+                    <input type="number" id="campAwayScore" min="0" value="0">
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="saveCampScore()">保存</button>
+                <button class="btn btn-secondary" onclick="closeCampScoreModal()">キャンセル</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 決勝スコア入力モーダル -->
+    <div id="finalScoreModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeFinalScoreModal()">&times;</span>
+            <h2 id="finalScoreModalTitle">決勝スコア入力</h2>
+            <div class="score-input-form">
+                <div class="team-score">
+                    <label id="finalTeamALabel">陣営A</label>
+                    <input type="number" id="finalTeamAScore" min="0" value="0">
+                </div>
+                <div class="vs">VS</div>
+                <div class="team-score">
+                    <label id="finalTeamBLabel">陣営B</label>
+                    <input type="number" id="finalTeamBScore" min="0" value="0">
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="saveFinalScore()">保存</button>
+                <button class="btn btn-secondary" onclick="closeFinalScoreModal()">キャンセル</button>
             </div>
         </div>
     </div>
