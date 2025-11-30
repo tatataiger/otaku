@@ -1286,7 +1286,7 @@ footer {
     gap: 2rem;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     .camp-standings {
         grid-template-columns: 1fr;
     }
@@ -1296,6 +1296,7 @@ footer {
     padding: 1.5rem;
     border-radius: var(--border-radius);
     border: 2px solid;
+    overflow-x: auto;
 }
 
 .camp-standing.camp-a {
@@ -1315,6 +1316,13 @@ footer {
 
 .camp-standing .standings-table {
     margin-bottom: 0;
+    font-size: 0.85rem;
+}
+
+.camp-standing .standings-table th,
+.camp-standing .standings-table td {
+    padding: 0.6rem 0.4rem;
+    white-space: nowrap;
 }
 
 /* ===================================
