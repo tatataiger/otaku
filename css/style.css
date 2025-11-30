@@ -42,8 +42,36 @@ header {
 
 header h1 {
     font-size: 1.8rem;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
     text-align: center;
+}
+
+/* 大会セレクター */
+.tournament-selector {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.tournament-selector select {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    min-width: 200px;
+    cursor: pointer;
+}
+
+.tournament-selector select:focus {
+    outline: 2px solid var(--secondary-color);
+}
+
+.btn-small {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
 }
 
 nav ul {
@@ -510,6 +538,50 @@ h3 {
     display: flex;
     gap: 1rem;
     justify-content: center;
+}
+
+/* フォームグループ */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+/* 警告テキスト */
+.warning-text {
+    text-align: center;
+    color: var(--danger-color);
+    margin: 1rem 0;
+    line-height: 1.8;
+}
+
+.delete-target {
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: var(--text-color);
+    padding: 1rem;
+    background: var(--background-color);
+    border-radius: 8px;
+    margin-bottom: 1rem;
 }
 
 /* フッター */

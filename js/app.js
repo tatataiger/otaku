@@ -1,6 +1,6 @@
 /**
  * 草野球大会 スコア管理システム
- * メインアプリケーション
+ * メインアプリケーション（複数大会対応版）
  */
 
 // ===================================
@@ -8,48 +8,131 @@
 // ===================================
 class TournamentManager {
     constructor() {
-        this.teams = [];
-        this.matches = [];
-        this.tournamentName = '';
-        this.tournamentDate = '';
+        this.tournaments = [];      // 全大会のリスト
+        this.currentTournamentId = null;  // 現在選択中の大会ID
         this.currentMatchIndex = -1;
         this.loadData();
     }
 
     // LocalStorageからデータを読み込み
     loadData() {
-        const savedData = localStorage.getItem('baseballTournament');
+        const savedData = localStorage.getItem('baseballTournaments');
         if (savedData) {
             const data = JSON.parse(savedData);
-            this.teams = data.teams || [];
-            this.matches = data.matches || [];
-            this.tournamentName = data.tournamentName || '';
-            this.tournamentDate = data.tournamentDate || '';
+            this.tournaments = data.tournaments || [];
+            this.currentTournamentId = data.currentTournamentId || null;
+        }
+        
+        // 旧データ形式からの移行
+        const oldData = localStorage.getItem('baseballTournament');
+        if (oldData && this.tournaments.length === 0) {
+            const old = JSON.parse(oldData);
+            if (old.teams && old.teams.length > 0) {
+                const migrated = {
+                    id: Date.now(),
+                    name: old.tournamentName || '移行された大会',
+                    date: old.tournamentDate || '',
+                    teams: old.teams || [],
+                    matches: old.matches || [],
+                    createdAt: new Date().toISOString()
+                };
+                this.tournaments.push(migrated);
+                this.currentTournamentId = migrated.id;
+                this.saveData();
+                localStorage.removeItem('baseballTournament');
+            }
         }
     }
 
     // LocalStorageにデータを保存
     saveData() {
         const data = {
-            teams: this.teams,
-            matches: this.matches,
-            tournamentName: this.tournamentName,
-            tournamentDate: this.tournamentDate
+            tournaments: this.tournaments,
+            currentTournamentId: this.currentTournamentId
         };
-        localStorage.setItem('baseballTournament', JSON.stringify(data));
+        localStorage.setItem('baseballTournaments', JSON.stringify(data));
+    }
+
+    // 現在の大会を取得
+    getCurrentTournament() {
+        if (!this.currentTournamentId) return null;
+        return this.tournaments.find(t => t.id === this.currentTournamentId);
+    }
+
+    // 新規大会を作成
+    createTournament(name, date) {
+        if (!name.trim()) {
+            alert('大会名を入力してください');
+            return false;
+        }
+        
+        const newTournament = {
+            id: Date.now(),
+            name: name.trim(),
+            date: date || '',
+            teams: [],
+            matches: [],
+            createdAt: new Date().toISOString()
+        };
+        
+        this.tournaments.push(newTournament);
+        this.currentTournamentId = newTournament.id;
+        this.saveData();
+        return true;
+    }
+
+    // 大会を削除
+    deleteTournament(id) {
+        const index = this.tournaments.findIndex(t => t.id === id);
+        if (index !== -1) {
+            this.tournaments.splice(index, 1);
+            if (this.currentTournamentId === id) {
+                this.currentTournamentId = this.tournaments.length > 0 ? this.tournaments[0].id : null;
+            }
+            this.saveData();
+            return true;
+        }
+        return false;
+    }
+
+    // 大会を切り替え
+    switchTournament(id) {
+        const tournament = this.tournaments.find(t => t.id === id);
+        if (tournament) {
+            this.currentTournamentId = id;
+            this.saveData();
+            return true;
+        }
+        return false;
+    }
+
+    // 大会情報を更新
+    updateTournamentInfo(name, date) {
+        const tournament = this.getCurrentTournament();
+        if (tournament) {
+            tournament.name = name;
+            tournament.date = date;
+            this.saveData();
+        }
     }
 
     // チームを追加
     addTeam(name) {
+        const tournament = this.getCurrentTournament();
+        if (!tournament) {
+            alert('先に大会を選択してください');
+            return false;
+        }
+        
         if (!name.trim()) {
             alert('チーム名を入力してください');
             return false;
         }
-        if (this.teams.find(t => t.name === name.trim())) {
+        if (tournament.teams.find(t => t.name === name.trim())) {
             alert('このチーム名は既に登録されています');
             return false;
         }
-        this.teams.push({
+        tournament.teams.push({
             id: Date.now(),
             name: name.trim()
         });
@@ -59,11 +142,14 @@ class TournamentManager {
 
     // チームを削除
     removeTeam(id) {
-        const index = this.teams.findIndex(t => t.id === id);
+        const tournament = this.getCurrentTournament();
+        if (!tournament) return;
+        
+        const index = tournament.teams.findIndex(t => t.id === id);
         if (index !== -1) {
-            this.teams.splice(index, 1);
+            tournament.teams.splice(index, 1);
             // 関連する試合も削除
-            this.matches = this.matches.filter(m => 
+            tournament.matches = tournament.matches.filter(m => 
                 m.homeTeamId !== id && m.awayTeamId !== id
             );
             this.saveData();
@@ -72,22 +158,28 @@ class TournamentManager {
 
     // 総当たり戦スケジュールを生成
     generateRoundRobinSchedule() {
-        if (this.teams.length < 2) {
+        const tournament = this.getCurrentTournament();
+        if (!tournament) {
+            alert('先に大会を選択してください');
+            return false;
+        }
+        
+        if (tournament.teams.length < 2) {
             alert('スケジュールを生成するには、最低2チーム必要です');
             return false;
         }
 
-        this.matches = [];
+        tournament.matches = [];
         let matchNumber = 1;
 
         // 総当たり戦: 全チームと全チームが対戦
-        for (let i = 0; i < this.teams.length; i++) {
-            for (let j = i + 1; j < this.teams.length; j++) {
-                this.matches.push({
+        for (let i = 0; i < tournament.teams.length; i++) {
+            for (let j = i + 1; j < tournament.teams.length; j++) {
+                tournament.matches.push({
                     id: Date.now() + matchNumber,
                     matchNumber: matchNumber,
-                    homeTeamId: this.teams[i].id,
-                    awayTeamId: this.teams[j].id,
+                    homeTeamId: tournament.teams[i].id,
+                    awayTeamId: tournament.teams[j].id,
                     homeScore: null,
                     awayScore: null,
                     completed: false
@@ -102,20 +194,26 @@ class TournamentManager {
 
     // スコアを保存
     saveMatchScore(matchIndex, homeScore, awayScore) {
-        if (matchIndex >= 0 && matchIndex < this.matches.length) {
-            this.matches[matchIndex].homeScore = parseInt(homeScore);
-            this.matches[matchIndex].awayScore = parseInt(awayScore);
-            this.matches[matchIndex].completed = true;
+        const tournament = this.getCurrentTournament();
+        if (!tournament) return;
+        
+        if (matchIndex >= 0 && matchIndex < tournament.matches.length) {
+            tournament.matches[matchIndex].homeScore = parseInt(homeScore);
+            tournament.matches[matchIndex].awayScore = parseInt(awayScore);
+            tournament.matches[matchIndex].completed = true;
             this.saveData();
         }
     }
 
     // チームの成績を計算
     getTeamStats() {
+        const tournament = this.getCurrentTournament();
+        if (!tournament) return [];
+        
         const stats = {};
         
         // 全チームの初期化
-        this.teams.forEach(team => {
+        tournament.teams.forEach(team => {
             stats[team.id] = {
                 id: team.id,
                 name: team.name,
@@ -130,7 +228,7 @@ class TournamentManager {
         });
 
         // 完了した試合から成績を計算
-        this.matches.filter(m => m.completed).forEach(match => {
+        tournament.matches.filter(m => m.completed).forEach(match => {
             const home = stats[match.homeTeamId];
             const away = stats[match.awayTeamId];
 
@@ -173,7 +271,10 @@ class TournamentManager {
 
     // 対戦結果を取得
     getMatchResult(team1Id, team2Id) {
-        const match = this.matches.find(m => 
+        const tournament = this.getCurrentTournament();
+        if (!tournament) return { result: '-', score: '-' };
+        
+        const match = tournament.matches.find(m => 
             (m.homeTeamId === team1Id && m.awayTeamId === team2Id) ||
             (m.homeTeamId === team2Id && m.awayTeamId === team1Id)
         );
@@ -203,20 +304,23 @@ class TournamentManager {
 
     // チーム名をIDから取得
     getTeamName(id) {
-        const team = this.teams.find(t => t.id === id);
+        const tournament = this.getCurrentTournament();
+        if (!tournament) return '不明';
+        
+        const team = tournament.teams.find(t => t.id === id);
         return team ? team.name : '不明';
     }
 
-    // データをリセット
-    resetData() {
-        if (confirm('全てのデータを削除しますか？この操作は取り消せません。')) {
-            this.teams = [];
-            this.matches = [];
-            this.tournamentName = '';
-            this.tournamentDate = '';
-            localStorage.removeItem('baseballTournament');
-            location.reload();
-        }
+    // 現在の大会のチーム一覧を取得
+    getTeams() {
+        const tournament = this.getCurrentTournament();
+        return tournament ? tournament.teams : [];
+    }
+
+    // 現在の大会の試合一覧を取得
+    getMatches() {
+        const tournament = this.getCurrentTournament();
+        return tournament ? tournament.matches : [];
     }
 }
 
@@ -260,34 +364,88 @@ function showPage(pageId) {
     }
 }
 
+// 大会セレクターを更新
+function updateTournamentSelector() {
+    const select = document.getElementById('tournamentSelect');
+    select.innerHTML = '<option value="">-- 大会を選択 --</option>';
+    
+    tournament.tournaments.forEach(t => {
+        const option = document.createElement('option');
+        option.value = t.id;
+        option.textContent = t.name + (t.date ? ` (${t.date})` : '');
+        if (t.id === tournament.currentTournamentId) {
+            option.selected = true;
+        }
+        select.appendChild(option);
+    });
+}
+
+// 大会を切り替え
+function switchTournament() {
+    const select = document.getElementById('tournamentSelect');
+    const id = parseInt(select.value);
+    
+    if (id) {
+        tournament.switchTournament(id);
+    } else {
+        tournament.currentTournamentId = null;
+        tournament.saveData();
+    }
+    
+    // 現在のページを更新
+    const activePage = document.querySelector('.page.active');
+    if (activePage) {
+        showPage(activePage.id);
+    }
+}
+
 // ホームページを更新
 function updateHomePage() {
-    document.getElementById('tournamentName').value = tournament.tournamentName;
-    document.getElementById('tournamentDate').value = tournament.tournamentDate;
-    document.getElementById('teamCount').textContent = tournament.teams.length;
-    document.getElementById('matchCount').textContent = tournament.matches.length;
+    const currentTournament = tournament.getCurrentTournament();
+    const noTournamentMsg = document.getElementById('noTournamentMessage');
+    const tournamentContent = document.getElementById('tournamentContent');
+    
+    if (!currentTournament) {
+        noTournamentMsg.style.display = 'block';
+        tournamentContent.style.display = 'none';
+        return;
+    }
+    
+    noTournamentMsg.style.display = 'none';
+    tournamentContent.style.display = 'block';
+    
+    document.getElementById('tournamentName').value = currentTournament.name;
+    document.getElementById('tournamentDate').value = currentTournament.date;
+    document.getElementById('teamCount').textContent = currentTournament.teams.length;
+    document.getElementById('matchCount').textContent = currentTournament.matches.length;
 
     // 大会名と日付の変更を監視
     document.getElementById('tournamentName').onchange = function() {
-        tournament.tournamentName = this.value;
-        tournament.saveData();
+        tournament.updateTournamentInfo(this.value, document.getElementById('tournamentDate').value);
+        updateTournamentSelector();
     };
     document.getElementById('tournamentDate').onchange = function() {
-        tournament.tournamentDate = this.value;
-        tournament.saveData();
+        tournament.updateTournamentInfo(document.getElementById('tournamentName').value, this.value);
+        updateTournamentSelector();
     };
 }
 
 // チームリストを更新
 function updateTeamList() {
     const listElement = document.getElementById('teamList');
+    const teams = tournament.getTeams();
     
-    if (tournament.teams.length === 0) {
+    if (!tournament.getCurrentTournament()) {
+        listElement.innerHTML = '<li class="empty-state"><p>大会を選択してください</p></li>';
+        return;
+    }
+    
+    if (teams.length === 0) {
         listElement.innerHTML = '<li class="empty-state"><p>チームがまだ登録されていません</p></li>';
         return;
     }
 
-    listElement.innerHTML = tournament.teams.map((team, index) => `
+    listElement.innerHTML = teams.map((team, index) => `
         <li>
             <span>${index + 1}. ${team.name}</span>
             <button class="btn btn-danger" onclick="removeTeam(${team.id})">削除</button>
@@ -316,7 +474,8 @@ function removeTeam(id) {
 
 // スケジュールを生成
 function generateSchedule() {
-    if (tournament.matches.length > 0) {
+    const matches = tournament.getMatches();
+    if (matches.length > 0) {
         if (!confirm('既存のスケジュールを上書きしますか？全ての試合結果がリセットされます。')) {
             return;
         }
@@ -331,8 +490,18 @@ function generateSchedule() {
 // スケジュールリストを更新
 function updateScheduleList() {
     const container = document.getElementById('scheduleList');
+    const matches = tournament.getMatches();
     
-    if (tournament.matches.length === 0) {
+    if (!tournament.getCurrentTournament()) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <p>大会を選択してください</p>
+            </div>
+        `;
+        return;
+    }
+    
+    if (matches.length === 0) {
         container.innerHTML = `
             <div class="empty-state">
                 <p>試合スケジュールがまだ生成されていません</p>
@@ -342,7 +511,7 @@ function updateScheduleList() {
         return;
     }
 
-    container.innerHTML = tournament.matches.map((match, index) => {
+    container.innerHTML = matches.map((match, index) => {
         const homeName = tournament.getTeamName(match.homeTeamId);
         const awayName = tournament.getTeamName(match.awayTeamId);
         const isCompleted = match.completed;
@@ -378,7 +547,8 @@ function updateScheduleList() {
 // スコア入力モーダルを開く
 function openScoreModal(matchIndex) {
     tournament.currentMatchIndex = matchIndex;
-    const match = tournament.matches[matchIndex];
+    const matches = tournament.getMatches();
+    const match = matches[matchIndex];
     
     document.getElementById('homeTeamLabel').textContent = tournament.getTeamName(match.homeTeamId);
     document.getElementById('awayTeamLabel').textContent = tournament.getTeamName(match.awayTeamId);
@@ -414,6 +584,12 @@ function updateStandings() {
     const tbody = document.getElementById('standingsBody');
     const stats = tournament.getTeamStats();
     
+    if (!tournament.getCurrentTournament()) {
+        tbody.innerHTML = '<tr><td colspan="10" class="empty-state">大会を選択してください</td></tr>';
+        document.getElementById('matchupTable').innerHTML = '';
+        return;
+    }
+    
     if (stats.length === 0) {
         tbody.innerHTML = '<tr><td colspan="10" class="empty-state">チームが登録されていません</td></tr>';
         document.getElementById('matchupTable').innerHTML = '';
@@ -442,7 +618,7 @@ function updateStandings() {
 // 対戦表を更新
 function updateMatchupTable() {
     const container = document.getElementById('matchupTable');
-    const teams = tournament.teams;
+    const teams = tournament.getTeams();
     
     if (teams.length < 2) {
         container.innerHTML = '<p class="empty-state">対戦表を表示するには、最低2チーム必要です</p>';
@@ -481,6 +657,57 @@ function updateMatchupTable() {
 }
 
 // ===================================
+// 大会管理モーダル
+// ===================================
+
+// 新規大会モーダルを開く
+function openNewTournamentModal() {
+    document.getElementById('newTournamentName').value = '';
+    document.getElementById('newTournamentDate').value = '';
+    document.getElementById('newTournamentModal').classList.add('active');
+}
+
+// 新規大会モーダルを閉じる
+function closeNewTournamentModal() {
+    document.getElementById('newTournamentModal').classList.remove('active');
+}
+
+// 新規大会を作成
+function createNewTournament() {
+    const name = document.getElementById('newTournamentName').value;
+    const date = document.getElementById('newTournamentDate').value;
+    
+    if (tournament.createTournament(name, date)) {
+        closeNewTournamentModal();
+        updateTournamentSelector();
+        showPage('home');
+    }
+}
+
+// 大会削除モーダルを開く
+function openDeleteTournamentModal() {
+    const currentTournament = tournament.getCurrentTournament();
+    if (!currentTournament) return;
+    
+    document.getElementById('deleteTournamentName').textContent = currentTournament.name;
+    document.getElementById('deleteTournamentModal').classList.add('active');
+}
+
+// 大会削除モーダルを閉じる
+function closeDeleteTournamentModal() {
+    document.getElementById('deleteTournamentModal').classList.remove('active');
+}
+
+// 大会削除を確定
+function confirmDeleteTournament() {
+    if (tournament.deleteTournament(tournament.currentTournamentId)) {
+        closeDeleteTournamentModal();
+        updateTournamentSelector();
+        showPage('home');
+    }
+}
+
+// ===================================
 // イベントリスナー
 // ===================================
 document.addEventListener('DOMContentLoaded', function() {
@@ -501,11 +728,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // モーダル外をクリックした時に閉じる
     document.getElementById('scoreModal').addEventListener('click', function(e) {
-        if (e.target === this) {
-            closeModal();
-        }
+        if (e.target === this) closeModal();
+    });
+    document.getElementById('newTournamentModal').addEventListener('click', function(e) {
+        if (e.target === this) closeNewTournamentModal();
+    });
+    document.getElementById('deleteTournamentModal').addEventListener('click', function(e) {
+        if (e.target === this) closeDeleteTournamentModal();
     });
 
+    // 大会セレクターを初期化
+    updateTournamentSelector();
+    
     // 初期表示
     showPage('home');
 });
@@ -517,10 +751,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // データをエクスポート（JSON形式）
 function exportData() {
     const data = {
-        tournamentName: tournament.tournamentName,
-        tournamentDate: tournament.tournamentDate,
-        teams: tournament.teams,
-        matches: tournament.matches,
+        tournaments: tournament.tournaments,
         exportDate: new Date().toISOString()
     };
     
@@ -528,7 +759,7 @@ function exportData() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `baseball-tournament-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `baseball-tournaments-${new Date().toISOString().split('T')[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
 }
@@ -539,10 +770,8 @@ function importData(file) {
     reader.onload = function(e) {
         try {
             const data = JSON.parse(e.target.result);
-            tournament.teams = data.teams || [];
-            tournament.matches = data.matches || [];
-            tournament.tournamentName = data.tournamentName || '';
-            tournament.tournamentDate = data.tournamentDate || '';
+            tournament.tournaments = data.tournaments || [];
+            tournament.currentTournamentId = tournament.tournaments.length > 0 ? tournament.tournaments[0].id : null;
             tournament.saveData();
             location.reload();
         } catch (error) {
