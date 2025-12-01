@@ -1404,7 +1404,9 @@ footer {
     }
     
     .match-card {
-        grid-template-columns: 1fr;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
         text-align: center;
         gap: 0.5rem;
         padding: 1rem;
@@ -1413,6 +1415,16 @@ footer {
     .match-card .team-name {
         font-size: 1rem;
         text-align: center !important;
+        width: 100%;
+    }
+    
+    .match-card .score-display {
+        margin: 0.5rem 0;
+    }
+    
+    .match-card .btn {
+        width: 100%;
+        max-width: 200px;
     }
     
     .match-card .score {
