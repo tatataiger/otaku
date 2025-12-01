@@ -1,7 +1,139 @@
 /**
  * 草野球大会 スコア管理システム
- * メインアプリケーション（複数大会対応版）
+ * メインアプリケーション（複数大会対応版 + Firebase対応）
  */
+
+// ===================================
+// Firebase連携
+// ===================================
+let firebaseInitialized = false;
+let currentUnsubscribe = null;  // 現在のリスナー解除関数
+
+// 接続状態を更新
+function updateConnectionStatus(status) {
+    const statusEl = document.getElementById('connectionStatus');
+    if (!statusEl) return;
+    
+    const icon = statusEl.querySelector('.status-icon');
+    const text = statusEl.querySelector('.status-text');
+    
+    statusEl.className = 'connection-status';
+    
+    switch(status) {
+        case 'online':
+            icon.textContent = '🟢';
+            text.textContent = 'オンライン（同期中）';
+            statusEl.classList.add('online');
+            break;
+        case 'syncing':
+            icon.textContent = '🟡';
+            text.textContent = '同期中...';
+            statusEl.classList.add('syncing');
+            break;
+        case 'local':
+            icon.textContent = '💾';
+            text.textContent = 'ローカル保存';
+            statusEl.classList.add('local');
+            break;
+        case 'offline':
+        default:
+            icon.textContent = '🔴';
+            text.textContent = 'オフライン';
+            break;
+    }
+}
+
+// Firebaseに大会データを保存
+async function saveTournamentToFirebase(tournament) {
+    if (!firebaseInitialized || !window.firebaseDb) return false;
+    
+    try {
+        updateConnectionStatus('syncing');
+        const docRef = window.firebaseDoc(window.firebaseDb, 'tournaments', String(tournament.id));
+        await window.firebaseSetDoc(docRef, {
+            ...tournament,
+            updatedAt: new Date().toISOString()
+        });
+        updateConnectionStatus('online');
+        return true;
+    } catch (error) {
+        console.error('Firebase保存エラー:', error);
+        updateConnectionStatus('offline');
+        return false;
+    }
+}
+
+// Firebaseから大会データを読み込み
+async function loadTournamentFromFirebase(tournamentId) {
+    if (!firebaseInitialized || !window.firebaseDb) return null;
+    
+    try {
+        const docRef = window.firebaseDoc(window.firebaseDb, 'tournaments', String(tournamentId));
+        const docSnap = await window.firebaseGetDoc(docRef);
+        
+        if (docSnap.exists()) {
+            return docSnap.data();
+        }
+        return null;
+    } catch (error) {
+        console.error('Firebase読み込みエラー:', error);
+        return null;
+    }
+}
+
+// Firebaseからリアルタイムで監視
+function subscribeToTournament(tournamentId, callback) {
+    if (!firebaseInitialized || !window.firebaseDb) return null;
+    
+    // 既存のリスナーを解除
+    if (currentUnsubscribe) {
+        currentUnsubscribe();
+    }
+    
+    try {
+        const docRef = window.firebaseDoc(window.firebaseDb, 'tournaments', String(tournamentId));
+        currentUnsubscribe = window.firebaseOnSnapshot(docRef, (doc) => {
+            if (doc.exists()) {
+                updateConnectionStatus('online');
+                callback(doc.data());
+            }
+        }, (error) => {
+            console.error('リアルタイム監視エラー:', error);
+            updateConnectionStatus('offline');
+        });
+        
+        return currentUnsubscribe;
+    } catch (error) {
+        console.error('リスナー設定エラー:', error);
+        return null;
+    }
+}
+
+// Firebaseから大会を削除
+async function deleteTournamentFromFirebase(tournamentId) {
+    if (!firebaseInitialized || !window.firebaseDb) return false;
+    
+    try {
+        const docRef = window.firebaseDoc(window.firebaseDb, 'tournaments', String(tournamentId));
+        await window.firebaseDeleteDoc(docRef);
+        return true;
+    } catch (error) {
+        console.error('Firebase削除エラー:', error);
+        return false;
+    }
+}
+
+// URLから大会IDを取得
+function getTournamentIdFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('t');
+}
+
+// 共有URLを生成
+function generateShareUrl(tournamentId) {
+    const baseUrl = window.location.origin + window.location.pathname;
+    return `${baseUrl}?t=${tournamentId}`;
+}
 
 // ===================================
 // データ管理
@@ -11,6 +143,7 @@ class TournamentManager {
         this.tournaments = [];      // 全大会のリスト
         this.currentTournamentId = null;  // 現在選択中の大会ID
         this.currentMatchIndex = -1;
+        this.isFirebaseSync = false;  // Firebaseと同期中かどうか
         this.loadData();
     }
 
@@ -44,13 +177,21 @@ class TournamentManager {
         }
     }
 
-    // LocalStorageにデータを保存
+    // LocalStorageにデータを保存（+ Firebase同期）
     saveData() {
         const data = {
             tournaments: this.tournaments,
             currentTournamentId: this.currentTournamentId
         };
         localStorage.setItem('baseballTournaments', JSON.stringify(data));
+        
+        // Firebaseにも保存（現在の大会のみ）
+        if (firebaseInitialized && this.currentTournamentId) {
+            const tournament = this.getCurrentTournament();
+            if (tournament) {
+                saveTournamentToFirebase(tournament);
+            }
+        }
     }
 
     // 現在の大会を取得
@@ -58,6 +199,30 @@ class TournamentManager {
         if (!this.currentTournamentId) return null;
         return this.tournaments.find(t => t.id === this.currentTournamentId);
     }
+    
+    // Firebaseから大会データを更新（リアルタイム同期用）
+    updateFromFirebase(data) {
+        if (!data) return;
+        
+        this.isFirebaseSync = true;
+        
+        const index = this.tournaments.findIndex(t => t.id === data.id);
+        if (index >= 0) {
+            this.tournaments[index] = data;
+        } else {
+            this.tournaments.push(data);
+        }
+        
+        // LocalStorageのみ更新（Firebaseへの再送信を防ぐ）
+        const localData = {
+            tournaments: this.tournaments,
+            currentTournamentId: this.currentTournamentId
+        };
+        localStorage.setItem('baseballTournaments', JSON.stringify(localData));
+        
+        this.isFirebaseSync = false;
+    }
+
 
     // 新規大会を作成
     createTournament(name, date, type = 'normal') {
@@ -726,9 +891,25 @@ function switchTournament() {
     
     if (id) {
         tournament.switchTournament(id);
+        
+        // Firebase監視を切り替え
+        if (firebaseInitialized) {
+            subscribeToTournament(id, (data) => {
+                if (!tournament.isFirebaseSync) {
+                    tournament.updateFromFirebase(data);
+                    refreshUI();
+                }
+            });
+        }
     } else {
         tournament.currentTournamentId = null;
         tournament.saveData();
+        
+        // 既存のFirebase監視を解除
+        if (currentUnsubscribe) {
+            currentUnsubscribe();
+            currentUnsubscribe = null;
+        }
     }
     
     // 現在のページを更新
@@ -1397,7 +1578,20 @@ function closeDeleteTournamentModal() {
 
 // 大会削除を確定
 function confirmDeleteTournament() {
-    if (tournament.deleteTournament(tournament.currentTournamentId)) {
+    const tournamentId = tournament.currentTournamentId;
+    
+    if (tournament.deleteTournament(tournamentId)) {
+        // Firebaseからも削除
+        if (firebaseInitialized) {
+            deleteTournamentFromFirebase(tournamentId);
+        }
+        
+        // 監視を解除
+        if (currentUnsubscribe) {
+            currentUnsubscribe();
+            currentUnsubscribe = null;
+        }
+        
         closeDeleteTournamentModal();
         updateTournamentSelector();
         showPage('home');
@@ -1433,13 +1627,139 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('deleteTournamentModal').addEventListener('click', function(e) {
         if (e.target === this) closeDeleteTournamentModal();
     });
+    document.getElementById('shareTournamentModal').addEventListener('click', function(e) {
+        if (e.target === this) closeShareModal();
+    });
 
     // 大会セレクターを初期化
     updateTournamentSelector();
     
     // 初期表示
     showPage('home');
+    
+    // Firebase初期化を待機
+    initFirebase();
 });
+
+// Firebase初期化
+function initFirebase() {
+    // Firebase未設定の場合はローカルモードで動作
+    if (window.firebaseReady === false) {
+        console.log('Firebase未設定: ローカルモードで動作');
+        updateConnectionStatus('local');
+        return;
+    }
+    
+    if (window.firebaseReady) {
+        onFirebaseReady();
+    } else {
+        window.addEventListener('firebaseReady', onFirebaseReady);
+    }
+}
+
+// Firebase準備完了時の処理
+async function onFirebaseReady() {
+    firebaseInitialized = true;
+    console.log('Firebase初期化完了');
+    
+    // URLから大会IDを確認
+    const urlTournamentId = getTournamentIdFromUrl();
+    
+    if (urlTournamentId) {
+        // 共有URLからアクセスした場合
+        updateConnectionStatus('syncing');
+        
+        // Firebaseから大会データを取得
+        const firebaseData = await loadTournamentFromFirebase(urlTournamentId);
+        
+        if (firebaseData) {
+            // ローカルに保存して選択
+            tournament.updateFromFirebase(firebaseData);
+            tournament.currentTournamentId = firebaseData.id;
+            tournament.saveData();
+            
+            // リアルタイム監視を開始
+            subscribeToTournament(urlTournamentId, (data) => {
+                if (!tournament.isFirebaseSync) {
+                    tournament.updateFromFirebase(data);
+                    refreshUI();
+                }
+            });
+            
+            updateConnectionStatus('online');
+            refreshUI();
+        } else {
+            updateConnectionStatus('offline');
+            alert('指定された大会が見つかりませんでした');
+        }
+    } else {
+        // 通常アクセス - 現在の大会がある場合はリアルタイム監視を開始
+        const currentTournament = tournament.getCurrentTournament();
+        if (currentTournament) {
+            // まずFirebaseに保存（初回同期）
+            await saveTournamentToFirebase(currentTournament);
+            
+            subscribeToTournament(currentTournament.id, (data) => {
+                if (!tournament.isFirebaseSync) {
+                    tournament.updateFromFirebase(data);
+                    refreshUI();
+                }
+            });
+        }
+        updateConnectionStatus('online');
+    }
+}
+
+// UIを全体的に更新
+function refreshUI() {
+    updateTournamentSelector();
+    updateDisplay();
+    
+    const currentTournament = tournament.getCurrentTournament();
+    if (currentTournament && currentTournament.type === 'taiko') {
+        updateTaikoTeamList();
+        updateTaikoScheduleList();
+        updateTaikoStandings();
+    }
+}
+
+// 共有モーダルを開く
+function openShareModal() {
+    const currentTournament = tournament.getCurrentTournament();
+    if (!currentTournament) {
+        alert('大会が選択されていません');
+        return;
+    }
+    
+    const shareUrl = generateShareUrl(currentTournament.id);
+    document.getElementById('shareUrl').value = shareUrl;
+    document.getElementById('shareTournamentModal').classList.add('active');
+}
+
+// 共有モーダルを閉じる
+function closeShareModal() {
+    document.getElementById('shareTournamentModal').classList.remove('active');
+}
+
+// 共有URLをコピー
+function copyShareUrl() {
+    const input = document.getElementById('shareUrl');
+    input.select();
+    document.execCommand('copy');
+    
+    // コピー完了通知
+    const btn = input.nextElementSibling;
+    const originalText = btn.textContent;
+    btn.textContent = 'コピーしました！';
+    btn.classList.add('btn-success');
+    btn.classList.remove('btn-primary');
+    
+    setTimeout(() => {
+        btn.textContent = originalText;
+        btn.classList.remove('btn-success');
+        btn.classList.add('btn-primary');
+    }, 2000);
+}
 
 // ===================================
 // ユーティリティ

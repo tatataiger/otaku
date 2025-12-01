@@ -1438,3 +1438,78 @@ footer {
     background: var(--secondary-color);
     color: white;
 }
+
+/* ===================================
+   接続状態表示
+   =================================== */
+.connection-status {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+.connection-status.online {
+    background: rgba(40, 167, 69, 0.1);
+    border: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+.connection-status.syncing {
+    background: rgba(255, 193, 7, 0.1);
+    border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.connection-status.local {
+    background: rgba(108, 117, 125, 0.1);
+    border: 1px solid rgba(108, 117, 125, 0.3);
+}
+
+.connection-status .status-icon {
+    font-size: 0.7rem;
+}
+
+/* ===================================
+   共有URL
+   =================================== */
+.share-url-container {
+    display: flex;
+    gap: 0.5rem;
+    margin: 1rem 0;
+}
+
+.share-url-container input {
+    flex: 1;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    background: var(--background-color);
+}
+
+.share-note {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+}
+
+/* ===================================
+   リアルタイム更新アニメーション
+   =================================== */
+@keyframes pulse-update {
+    0% { box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(102, 126, 234, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(102, 126, 234, 0); }
+}
+
+.just-updated {
+    animation: pulse-update 0.6s ease-out;
+}
