@@ -621,9 +621,13 @@ class TournamentManager {
         const tournament = this.getCurrentTournament();
         if (!tournament || tournament.type !== 'taiko') return null;
         
-        let campAPoints = 0;
-        let campBPoints = 0;
+        let campAWins = 0;
+        let campBWins = 0;
         let allCompleted = true;
+        
+        if (!tournament.finalMatches || tournament.finalMatches.length === 0) {
+            return null;
+        }
         
         tournament.finalMatches.forEach(match => {
             if (!match.completed) {
@@ -632,21 +636,18 @@ class TournamentManager {
             }
             
             if (match.teamAScore > match.teamBScore) {
-                campAPoints += 3;
+                campAWins++;
             } else if (match.teamAScore < match.teamBScore) {
-                campBPoints += 3;
-            } else {
-                campAPoints += 1;
-                campBPoints += 1;
+                campBWins++;
             }
         });
         
         if (!allCompleted) return null;
         
         let winner;
-        if (campAPoints > campBPoints) {
+        if (campAWins > campBWins) {
             winner = 'A';
-        } else if (campBPoints > campAPoints) {
+        } else if (campBWins > campAWins) {
             winner = 'B';
         } else {
             winner = 'draw';
@@ -654,8 +655,8 @@ class TournamentManager {
         
         return {
             winner: winner,
-            campAPoints: campAPoints,
-            campBPoints: campBPoints,
+            campAWins: campAWins,
+            campBWins: campBWins,
             campAName: tournament.campA.name,
             campBName: tournament.campB.name
         };
