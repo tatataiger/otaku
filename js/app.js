@@ -1713,7 +1713,10 @@ async function onFirebaseReady() {
 // UIを全体的に更新
 function refreshUI() {
     updateTournamentSelector();
-    updateDisplay();
+    updateHomePage();
+    updateTeamList();
+    updateScheduleList();
+    updateStandings();
     
     const currentTournament = tournament.getCurrentTournament();
     if (currentTournament && currentTournament.type === 'taiko') {
